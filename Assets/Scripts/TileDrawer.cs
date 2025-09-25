@@ -1,16 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class TileDisplay : MonoBehaviour
+public class TileDrawer : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public Tile assignedTile;
+    [SerializeField] private MeshRenderer mesh;
+    [SerializeField] private List<Material> mats;
+    public void ChangeMaterial(int materialID)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        mesh.material = mats[materialID];
     }
 }
