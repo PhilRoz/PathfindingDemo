@@ -60,6 +60,9 @@ MonoBehaviour:
   - {fileID: 2100000, guid: eedb507557350514fa339ce9c5a162ec, type: 2}
   - {fileID: 2100000, guid: a65b34b3036b4544fbf93a4ff4c32a45, type: 2}
   - {fileID: 2100000, guid: 1442bb86668665540b0b95fa9a85010a, type: 2}
+  - {fileID: 2100000, guid: bfb1e6ace359432479d465ff93abe627, type: 2}
+  - {fileID: 2100000, guid: 8fe9ece495510184a979825eefa8f646, type: 2}
+  - {fileID: 2100000, guid: d6dc39cbe297dfa48a1617ebbd3633a6, type: 2}
 --- !u!23 &1908927884458703712
 MeshRenderer:
   m_ObjectHideFlags: 0

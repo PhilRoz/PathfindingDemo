@@ -8,10 +8,22 @@ public class CameraControlller : MonoBehaviour
     const float minZoomValue = 5f;
     const float maxZoomValue = 50f;
 
+    GameMap map;
+    Collider cachedHit;
+
+    private void Start()
+    {
+        map = FindFirstObjectByType<GameMap>();
+    }
+
     void Update()
     {
         CameraDrag();
         CameraZoom();
+
+
+        //if (Input.GetKeyDown(KeyCode.Space))
+        TryRunPathfinding();
     }
 
 
@@ -47,6 +59,25 @@ public class CameraControlller : MonoBehaviour
             Vector3 pos = transform.position;
             pos.y = Mathf.Clamp(pos.y, minZoomValue, maxZoomValue);
             transform.position = pos;
+        }
+    }
+
+
+    void TryRunPathfinding()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            if (hit.collider == cachedHit) { return; }
+            cachedHit = hit.collider;
+
+            TileDrawer tileDisplay = hit.collider.GetComponent<TileDrawer>();
+            if (tileDisplay != null)
+            {
+                map.FindPath(tileDisplay.transform.position);
+            }
         }
     }
 }
