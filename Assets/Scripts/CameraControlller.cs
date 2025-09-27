@@ -9,23 +9,48 @@ public class CameraControlller : MonoBehaviour
     const float maxZoomValue = 50f;
 
     GameMap map;
-    Collider cachedHit;
+    EditMode editMode; 
+    Collider lastHitTile;
 
     private void Start()
     {
         map = FindFirstObjectByType<GameMap>();
+        editMode = FindFirstObjectByType<EditMode>();
     }
 
     void Update()
     {
+        Click();
+
         CameraDrag();
         CameraZoom();
 
-
-        //if (Input.GetKeyDown(KeyCode.Space))
+        if (editMode.currentState == EditMode.State.Play)
         TryRunPathfinding();
     }
 
+    void Click()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.collider != lastHitTile || Input.GetMouseButtonDown(0))
+                {
+                    lastHitTile = hit.collider;
+
+                    TileDrawer tileDrawer = hit.collider.GetComponent<TileDrawer>();
+                    if (tileDrawer != null)
+                    {
+                        editMode.Click(tileDrawer);
+                    }
+                }
+            }
+        }
+    }
 
     void CameraDrag()
     {
@@ -70,13 +95,13 @@ public class CameraControlller : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))
         {
-            if (hit.collider == cachedHit) { return; }
-            cachedHit = hit.collider;
+            if (hit.collider == lastHitTile) { return; }
+            lastHitTile = hit.collider;
 
-            TileDrawer tileDisplay = hit.collider.GetComponent<TileDrawer>();
-            if (tileDisplay != null)
+            TileDrawer tileDrawer = hit.collider.GetComponent<TileDrawer>();
+            if (tileDrawer != null)
             {
-                map.FindPath(tileDisplay.transform.position);
+                map.FindPath(tileDrawer.transform.position);
             }
         }
     }
