@@ -34,8 +34,8 @@ public class BFSPathfinding : MonoBehaviour
         Array.Clear(parentY, 0, parentY.Length);
 
         startPosition = start;
-        this.savedTiles = tiles;
-        this.isCoverAnObstacle = treatCoverAsObstacle;
+        savedTiles = tiles;
+        isCoverAnObstacle = treatCoverAsObstacle;
 
         queueStart = 0;
         queueEnd = 0;
@@ -57,12 +57,14 @@ public class BFSPathfinding : MonoBehaviour
         }
         int endX = end.x, endY = end.y;
 
-        if (endX < 0 || endX >= width || endY < 0 || endY >= height) return null;
+        if (!IsValidAndPassable(endX, endY)) return null;
 
         if (visited[endX, endY])
             return BuildPath(endX, endY);
 
         int steps = 0;
+        bool targetFound = false;
+
         while (queueStart < queueEnd && steps < maxStepsPerCall)
         {
             int currentX = queueX[queueStart];
@@ -70,17 +72,19 @@ public class BFSPathfinding : MonoBehaviour
             queueStart++;
             steps++;
 
+            if (currentX == endX && currentY == endY)
+                targetFound = true;
+
             for (int dir = 0; dir < 4; dir++)
             {
                 int neighborX = currentX + DirectionX[dir];
                 int neighborY = currentY + DirectionY[dir];
 
-                if (TryAddNeighbor(neighborX, neighborY, currentX, currentY))
-                {
-                    if (neighborX == endX && neighborY == endY)
-                        return BuildPath(endX, endY);
-                }
+                TryAddNeighbor(neighborX, neighborY, currentX, currentY);
             }
+
+            if (targetFound)
+                return BuildPath(endX, endY);
         }
 
         if (visited[endX, endY])
@@ -93,7 +97,7 @@ public class BFSPathfinding : MonoBehaviour
     {
         if (x < 0 || x >= width || y < 0 || y >= height) return false;
 
-        ref Tile tile = ref savedTiles[x, y];
+        Tile tile = savedTiles[x, y];
         return tile.tileState != Tile.State.Obstacle &&
                (!isCoverAnObstacle || tile.tileState != Tile.State.Cover);
     }
@@ -105,7 +109,7 @@ public class BFSPathfinding : MonoBehaviour
         if (visited[neighborX, neighborY])
             return false;
 
-        ref Tile tile = ref savedTiles[neighborX, neighborY];
+        Tile tile = savedTiles[neighborX, neighborY];
         if (tile.tileState == Tile.State.Obstacle ||
             (isCoverAnObstacle && tile.tileState == Tile.State.Cover))
             return false;
