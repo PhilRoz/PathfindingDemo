@@ -4,12 +4,15 @@ using UnityEngine;
 public class TileDrawer : MonoBehaviour
 {
     public Tile assignedTile;
+    public bool isActive;
+    public int lastColor;
     [SerializeField] private MeshRenderer mesh;
     [SerializeField] private List<Material> mats;
 
     const int possibleStateCount = 3;
     public void ChangeMaterial(int materialID)
     {
+        lastColor = materialID;
         mesh.material = mats[materialID];
     }
 

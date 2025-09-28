@@ -58,9 +58,12 @@ public class GameMap : MonoBehaviour
     public void PaintPath(List<Vector2Int> path)
     {
         ClearPath();
+        int tileCount = 0;
         foreach (var vector in path)
         {
-            tiles[vector.x, vector.y].tileDrawer.ChangeMaterial(3);
+            int colorToPaint = tileCount > moveRange ? 4 : 3;
+            tileCount++;
+            tiles[vector.x, vector.y].tileDrawer.ChangeMaterial(colorToPaint);
             paintedTiles.Add(vector);
         }
     }
@@ -96,6 +99,7 @@ public class GameMap : MonoBehaviour
                             var valueCheck = new Vector2Int(x, y);
                             if (tilePool.ContainsKey(valueCheck))
                                 tilePool[valueCheck].gameObject.SetActive(false);
+                            tilePool[valueCheck].isActive = false;
                         }
                     }
                 }
@@ -112,14 +116,17 @@ public class GameMap : MonoBehaviour
                     var valueCheck = new Vector2Int(x, y);
                     if (tilePool.ContainsKey(valueCheck))
                     {
-                        tiles[x, y].tileDrawer = tilePool[valueCheck];
-                        tilePool[valueCheck].gameObject.SetActive(true);
+                        var existingDrawer = tilePool[valueCheck];
+                        tiles[x, y].tileDrawer = existingDrawer;
+                        if (!existingDrawer.isActive) tilePool[valueCheck].gameObject.SetActive(true);
+                        existingDrawer.isActive = true;
                     }
                     else
                     {
                         var newDrawer = Instantiate(tilePrefab, new Vector3(x, 0, y), Quaternion.Euler(90, 0, 0), transform).GetComponent<TileDrawer>();
                         tiles[x, y].tileDrawer = newDrawer;
                         tilePool.Add(valueCheck, newDrawer);
+                        newDrawer.isActive = true;
                     }
                     tiles[x, y].tileDrawer.assignedTile = tiles[x, y];
                 }
@@ -129,8 +136,11 @@ public class GameMap : MonoBehaviour
         foreach (Tile tile in tiles)
         {
             int obstacleType = randomizeObstacles ? GetRandomTileStateID() : 0;
-            tile.tileState = (Tile.State)obstacleType;
-            tile.tileDrawer.ChangeMaterial(obstacleType);
+            if (tile.tileDrawer.lastColor != obstacleType)
+            {
+                tile.tileState = (Tile.State)obstacleType;
+                tile.tileDrawer.ChangeMaterial(obstacleType);
+            }
         }
         
         
