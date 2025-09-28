@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -7,10 +8,10 @@ public class EditMode : MonoBehaviour
     public State currentState;
 
     [SerializeField] GameMap map;
-
     int cachedPaintColor;
 
-    public UnityEvent onEnterPlay;
+    [HideInInspector] public UnityEvent onEnterPlay;
+    [HideInInspector] public UnityEvent onChangeState;
 
     void Start()
     {
@@ -53,6 +54,7 @@ public class EditMode : MonoBehaviour
         if (currentState == State.Play) { OnExitPlay(); }
         currentState = (State)stateID; 
         if (currentState == State.Play) { OnEnterPlay(); }
+        onChangeState.Invoke();
     }
 
 
@@ -91,4 +93,16 @@ public class EditMode : MonoBehaviour
         map.ClearPath();
     }
 
+    public void UpdateMoveRange(int newMoveRange)
+    {
+        map.moveRange = newMoveRange;
+    }
+    public void UpdateAttackRange(int newAtkRange)
+    {
+        map.attackRange = newAtkRange;
+    }
+    public void UpdateMap(Vector2Int size, bool obstacles)
+    {
+        map.GenerateNewMap(size, obstacles);
+    }
 }

@@ -20,14 +20,15 @@ public class GameMap : MonoBehaviour
     Character player;
     Dictionary<Vector2Int, Character> enemies;
     List<Vector2Int> paintedTiles;
-
+    new Transform transform;
 
     void Start()
     {
         enemies = new Dictionary<Vector2Int, Character>();
-        GenerateNewMap();
+        GenerateNewMap(mapSize);
         ResetSearch();
         paintedTiles = new List<Vector2Int>();
+        transform = GetComponent<Transform>();
     }
 
     public Vector2Int ConvertCoordinate(Vector3 position)
@@ -77,26 +78,38 @@ public class GameMap : MonoBehaviour
     }
 
 
-    public void GenerateNewMap(bool randomizeObstacles = true)
+    public void GenerateNewMap(Vector2Int size, bool randomizeObstacles = true)
     {
-        tiles = new Tile[mapSize.x, mapSize.y];
-        for (int x = 0; x < mapSize.x; x++)
+        if (mapSize != size || tiles == null)
         {
-            for (int y = 0; y < mapSize.y; y++)
+            if (tiles != null)
             {
-                tiles[x, y] = new Tile();
-                tiles[x, y].tileDrawer = Instantiate(tilePrefab, new Vector3(x, 0, y), Quaternion.Euler(90, 0, 0), this.transform).GetComponent<TileDrawer>();
-                tiles[x, y].tileDrawer.assignedTile = tiles[x, y];
-
-                if (randomizeObstacles)
+                foreach (Tile tile in tiles)
                 {
-                    int obstacleType = GetRandomTileStateID();
-                    tiles[x, y].tileState = (Tile.State)obstacleType;
-                    tiles[x, y].tileDrawer.ChangeMaterial(obstacleType);
+                    Destroy(tile.tileDrawer.gameObject);
+                }
+            }
+            mapSize = size;
+            tiles = new Tile[size.x, size.y];
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    tiles[x, y] = new Tile();
+                    tiles[x, y].tileDrawer = Instantiate(tilePrefab, new Vector3(x, 0, y), Quaternion.Euler(90, 0, 0), transform).GetComponent<TileDrawer>();
+                    tiles[x, y].tileDrawer.assignedTile = tiles[x, y];
                 }
             }
         }
 
+        foreach (Tile tile in tiles)
+        {
+            int obstacleType = randomizeObstacles ? GetRandomTileStateID() : 0;
+            tile.tileState = (Tile.State)obstacleType;
+            tile.tileDrawer.ChangeMaterial(obstacleType);
+        }
+        
+        
         SetPlayerPosition(Vector2Int.zero);
 
         foreach (KeyValuePair<Vector2Int,Character> kvp in enemies)
