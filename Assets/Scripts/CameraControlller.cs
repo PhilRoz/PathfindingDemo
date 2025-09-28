@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CameraControlller : MonoBehaviour
 {
@@ -34,6 +35,8 @@ public class CameraControlller : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
+            if (EventSystem.current.IsPointerOverGameObject()) return; 
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 

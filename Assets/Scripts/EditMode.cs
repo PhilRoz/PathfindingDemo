@@ -34,7 +34,7 @@ public class EditMode : MonoBehaviour
         switch (currentState)
         {
             case State.Play:
-                PerformMovement();
+                PerformMovement(drawer);
                 break;
             case State.EditPlayer:
                 ChangePlayerLocation(drawer);
@@ -58,9 +58,9 @@ public class EditMode : MonoBehaviour
     }
 
 
-    void PerformMovement()
+    void PerformMovement(TileDrawer drawer)
     {
-
+        map.PerformPlayerAction(map.ConvertCoordinate(drawer.transform.localPosition));
     }
 
     void ChangePlayerLocation(TileDrawer drawer)

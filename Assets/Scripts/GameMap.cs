@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class GameMap : MonoBehaviour
@@ -172,9 +173,15 @@ public class GameMap : MonoBehaviour
         tiles[position.x, position.y].tileState = Tile.State.Traversable;
         tiles[position.x, position.y].tileDrawer.ChangeMaterial(0);
     }
+
+    public void PerformPlayerAction(Vector2Int destination)
+    {
+        player.Move(pathfinding.FindPath(destination, maxStepsPerCall: 1000000));
+    }
     
     public void AddOrDeleteEnemy(Vector2Int position)
     {
+        if (player.currentPosition == position) return;
         if (enemies.ContainsKey(position))
         {
             var enemy = enemies.GetValueOrDefault(position);
