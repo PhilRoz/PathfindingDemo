@@ -17,6 +17,7 @@ public class GameMap : MonoBehaviour
     public BFSPathfinding pathfinding;
 
     Tile[,] tiles;
+    Dictionary <Vector2Int, TileDrawer> tilePool;
     Character player;
     Dictionary<Vector2Int, Character> enemies;
     List<Vector2Int> paintedTiles;
@@ -25,6 +26,7 @@ public class GameMap : MonoBehaviour
     void Start()
     {
         enemies = new Dictionary<Vector2Int, Character>();
+        tilePool = new Dictionary<Vector2Int, TileDrawer>();
         GenerateNewMap(mapSize);
         ResetSearch();
         paintedTiles = new List<Vector2Int>();
@@ -82,21 +84,43 @@ public class GameMap : MonoBehaviour
     {
         if (mapSize != size || tiles == null)
         {
-            if (tiles != null)
+
+            if (mapSize.x > size.x || mapSize.y > size.y) //find any tiles outside of new range and disable them
             {
-                foreach (Tile tile in tiles)
+                for (int x = 0; x < mapSize.x; x++)
                 {
-                    Destroy(tile.tileDrawer.gameObject);
+                    for (int y = 0; y < mapSize.y; y++)
+                    {
+                        if (x >= size.x || y >= size.y)
+                        {
+                            var valueCheck = new Vector2Int(x, y);
+                            if (tilePool.ContainsKey(valueCheck))
+                                tilePool[valueCheck].gameObject.SetActive(false);
+                        }
+                    }
                 }
             }
             mapSize = size;
+
             tiles = new Tile[size.x, size.y];
             for (int x = 0; x < size.x; x++)
             {
                 for (int y = 0; y < size.y; y++)
                 {
+                    
                     tiles[x, y] = new Tile();
-                    tiles[x, y].tileDrawer = Instantiate(tilePrefab, new Vector3(x, 0, y), Quaternion.Euler(90, 0, 0), transform).GetComponent<TileDrawer>();
+                    var valueCheck = new Vector2Int(x, y);
+                    if (tilePool.ContainsKey(valueCheck))
+                    {
+                        tiles[x, y].tileDrawer = tilePool[valueCheck];
+                        tilePool[valueCheck].gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        var newDrawer = Instantiate(tilePrefab, new Vector3(x, 0, y), Quaternion.Euler(90, 0, 0), transform).GetComponent<TileDrawer>();
+                        tiles[x, y].tileDrawer = newDrawer;
+                        tilePool.Add(valueCheck, newDrawer);
+                    }
                     tiles[x, y].tileDrawer.assignedTile = tiles[x, y];
                 }
             }
