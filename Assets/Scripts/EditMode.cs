@@ -26,22 +26,6 @@ public class EditMode : MonoBehaviour
                 cachedPaintColor = -1;
             }
         }
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            ChangeState(0);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            ChangeState(1);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            ChangeState(2);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            ChangeState(3);
-        }
     }
 
     public void Click(TileDrawer drawer)
