@@ -18,21 +18,30 @@ public class GameMap : MonoBehaviour
 
     Tile[,] tiles;
     Character player;
-    Character enemy;
+    Dictionary<Vector2Int, Character> enemies;
     List<Vector2Int> paintedTiles;
 
 
     void Start()
     {
+        enemies = new Dictionary<Vector2Int, Character>();
         GenerateNewMap();
+        ResetSearch();
         paintedTiles = new List<Vector2Int>();
-        pathfinding.ResetSearch(tiles, player.currentPosition, true);
     }
 
+    public Vector2Int ConvertCoordinate(Vector3 position)
+    {
+        return new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
+    }
+    public Vector3 ConvertCoordinate(Vector2Int position)
+    {
+        return new Vector3(position.x, 0, position.y);
+    }
 
     public void FindPath(Vector3 destination)
     {
-        Vector2Int vector2 = new Vector2Int(Mathf.RoundToInt(destination.x), Mathf.RoundToInt(destination.z));
+        Vector2Int vector2 = ConvertCoordinate(destination);
         FindPath(vector2);
     }
     public void FindPath(Vector2Int destination)
@@ -45,11 +54,7 @@ public class GameMap : MonoBehaviour
     }
     public void PaintPath(List<Vector2Int> path)
     {
-        foreach (var vector in paintedTiles)
-        {
-            tiles[vector.x, vector.y].tileDrawer.ChangeMaterial((int)tiles[vector.x, vector.y].tileState);
-        }
-        paintedTiles.Clear();
+        ClearPath();
         foreach (var vector in path)
         {
             tiles[vector.x, vector.y].tileDrawer.ChangeMaterial(3);
@@ -57,9 +62,22 @@ public class GameMap : MonoBehaviour
         }
     }
 
+    public void ClearPath()
+    {
+        foreach (var vector in paintedTiles)
+        {
+            tiles[vector.x, vector.y].tileDrawer.ChangeMaterial((int)tiles[vector.x, vector.y].tileState);
+        }
+        paintedTiles.Clear();
+    }
+
+    public void ResetSearch()
+    {
+        pathfinding.ResetSearch(tiles, player.currentPosition, true);
+    }
 
 
-    void GenerateNewMap(bool randomizeObstacles = true)
+    public void GenerateNewMap(bool randomizeObstacles = true)
     {
         tiles = new Tile[mapSize.x, mapSize.y];
         for (int x = 0; x < mapSize.x; x++)
@@ -79,20 +97,53 @@ public class GameMap : MonoBehaviour
             }
         }
 
-        player = Instantiate(characterPrefab, Vector3.zero, Quaternion.identity, this.transform).GetComponent<Character>();
-        player.currentPosition = Vector2Int.zero;
-        player.ChangeColor(Color.blue);
-        tiles[0, 0].tileState = Tile.State.Traversable;
-        tiles[0, 0].tileDrawer.ChangeMaterial(0);
+        SetPlayerPosition(Vector2Int.zero);
 
-        Vector2Int enemyPosition = GetRandomVacantPosition(10);
-        enemy = Instantiate(characterPrefab, new Vector3(enemyPosition.x, 0, enemyPosition.y), Quaternion.identity, this.transform).GetComponent<Character>();
-        enemy.currentPosition = enemyPosition;
-        enemy.ChangeColor(Color.red);
-        tiles[enemyPosition.x, enemyPosition.y].tileState = Tile.State.Traversable;
-        tiles[enemyPosition.x, enemyPosition.y].tileDrawer.ChangeMaterial(0);
+        foreach (KeyValuePair<Vector2Int,Character> kvp in enemies)
+        {
+            Destroy(kvp.Value.gameObject);
+        }
+        enemies.Clear();
+        AddOrDeleteEnemy(GetRandomVacantPosition(10));
+
     }
 
+    public Vector3 GetPlayerPosition()
+    {
+        return player.transform.position;
+    }
+
+    public void SetPlayerPosition(Vector2Int position)
+    {
+        if (player == null)
+        {
+            player = Instantiate(characterPrefab, Vector3.zero, Quaternion.identity, this.transform).GetComponent<Character>();
+            player.ChangeColor(Color.blue);
+        }
+        player.currentPosition = position;
+        player.transform.localPosition = ConvertCoordinate(position);
+        tiles[position.x, position.y].tileState = Tile.State.Traversable;
+        tiles[position.x, position.y].tileDrawer.ChangeMaterial(0);
+    }
+    
+    public void AddOrDeleteEnemy(Vector2Int position)
+    {
+        if (enemies.ContainsKey(position))
+        {
+            var enemy = enemies.GetValueOrDefault(position);
+            enemies.Remove(position);
+            Destroy(enemy.gameObject);
+        }
+        else
+        {
+            var enemy = Instantiate(characterPrefab, new Vector3(position.x, 0, position.y), Quaternion.identity, this.transform).GetComponent<Character>();
+            enemies.Add(position, enemy);
+            enemy.currentPosition = position;
+            enemy.ChangeColor(Color.red);
+            tiles[position.x, position.y].tileState = Tile.State.Traversable;
+            tiles[position.x, position.y].tileDrawer.ChangeMaterial(0);
+        }
+    }
 
     Vector2Int GetRandomVacantPosition(int radiusFromPlayer = -1)
     {

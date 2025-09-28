@@ -16,6 +16,7 @@ public class CameraControlller : MonoBehaviour
     {
         map = FindFirstObjectByType<GameMap>();
         editMode = FindFirstObjectByType<EditMode>();
+        editMode.onEnterPlay.AddListener(CenterCamera);
     }
 
     void Update()
@@ -76,6 +77,12 @@ public class CameraControlller : MonoBehaviour
             lastMousePos = currentMousePos;
         }
     }
+
+    public void CenterCamera()
+    {
+        transform.position = map.GetPlayerPosition() + Vector3.up * minZoomValue;
+    }
+
     void CameraZoom()
     {
         transform.Translate(Vector3.down * Input.mouseScrollDelta.y * (transform.position.y / 10));

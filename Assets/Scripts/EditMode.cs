@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class EditMode : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class EditMode : MonoBehaviour
     [SerializeField] GameMap map;
 
     int cachedPaintColor;
+
+    public UnityEvent onEnterPlay;
 
     void Start()
     {
@@ -23,6 +26,22 @@ public class EditMode : MonoBehaviour
                 cachedPaintColor = -1;
             }
         }
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            ChangeState(0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            ChangeState(1);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            ChangeState(2);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            ChangeState(3);
+        }
     }
 
     public void Click(TileDrawer drawer)
@@ -33,10 +52,10 @@ public class EditMode : MonoBehaviour
                 PerformMovement();
                 break;
             case State.EditPlayer:
-                ChangePlayerLocation();
+                ChangePlayerLocation(drawer);
                 break;
             case State.EditEnemy:
-                CreateEnemy();
+                CreateEnemy(drawer);
                 break;
             case State.EditMap:
                 DrawOnMap(drawer);
@@ -44,6 +63,13 @@ public class EditMode : MonoBehaviour
         }
     }
 
+    public void ChangeState(int stateID)
+    {
+        if (currentState == (State)stateID) return;
+        if (currentState == State.Play) { OnExitPlay(); }
+        currentState = (State)stateID; 
+        if (currentState == State.Play) { OnEnterPlay(); }
+    }
 
 
     void PerformMovement()
@@ -51,19 +77,18 @@ public class EditMode : MonoBehaviour
 
     }
 
-    void ChangePlayerLocation()
+    void ChangePlayerLocation(TileDrawer drawer)
     {
-
+        map.SetPlayerPosition(map.ConvertCoordinate(drawer.transform.localPosition));
     }
 
-    void CreateEnemy()
+    void CreateEnemy(TileDrawer drawer)
     {
-
+        map.AddOrDeleteEnemy(map.ConvertCoordinate(drawer.transform.localPosition));
     }
 
     void DrawOnMap(TileDrawer drawer)
     {
-        Debug.Log(cachedPaintColor);
         if (cachedPaintColor == -1)
         {
             cachedPaintColor = drawer.GetNextTileState();
@@ -72,13 +97,14 @@ public class EditMode : MonoBehaviour
         drawer.ChangeMaterial(cachedPaintColor);
     }
 
-    public void OnEnterPlay()
+    void OnEnterPlay()
     {
-        //reset search cache
+        map.ResetSearch();
+        onEnterPlay.Invoke();
     }
-    public void OnExitPlay()
+    void OnExitPlay()
     {
-        //reset pathfinding
+        map.ClearPath();
     }
 
 }

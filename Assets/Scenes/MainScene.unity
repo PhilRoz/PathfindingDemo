@@ -568,6 +568,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentState: 0
   map: {fileID: 1287678578}
+  onEnterPlay:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1338096419
 Transform:
   m_ObjectHideFlags: 0
