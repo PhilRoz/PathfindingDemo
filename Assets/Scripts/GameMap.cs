@@ -16,6 +16,7 @@ public class GameMap : MonoBehaviour
     public GameObject tilePrefab;
     public GameObject characterPrefab;
     public BFSPathfinding pathfinding;
+    public BFSPathfinding redPathfinding;
 
     Tile[,] tiles;
     Dictionary <Vector2Int, TileDrawer> tilePool;
@@ -50,20 +51,30 @@ public class GameMap : MonoBehaviour
     }
     public void FindPath(Vector2Int destination)
     {
-        var path = pathfinding.FindPath(destination, maxStepsPerCall: 1000000);
+        List<Vector2Int> path;
+        bool attack = enemies.ContainsKey(destination);
+        if (attack) { path = redPathfinding.FindPath(destination); }
+        else { path = pathfinding.FindPath(destination); }
         if (path != null && path.Count > 0)
         {
-            PaintPath(path);
+            PaintPath(path, attack);
         }
     }
-    public void PaintPath(List<Vector2Int> path)
+    public void PaintPath(List<Vector2Int> path, bool isRed = false)
     {
         ClearPath();
         int tileCount = 0;
+        int colorToPaint;
         foreach (var vector in path)
         {
-            int colorToPaint = tileCount > moveRange ? 4 : 3;
-            tileCount++;
+            if (isRed) {
+                colorToPaint = tileCount > attackRange ? 6 : 5;
+            }
+            else
+            {
+                colorToPaint = tileCount > moveRange ? 4 : 3;
+            }
+                tileCount++;
             tiles[vector.x, vector.y].tileDrawer.ChangeMaterial(colorToPaint);
             paintedTiles.Add(vector);
         }
@@ -81,6 +92,7 @@ public class GameMap : MonoBehaviour
     public void ResetSearch()
     {
         pathfinding.ResetSearch(tiles, player.currentPosition, true);
+        redPathfinding.ResetSearch(tiles, player.currentPosition, false);
     }
 
 

@@ -55,6 +55,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63451b017c356fc46bb492a306e741f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isActive: 0
+  lastColor: 0
   mesh: {fileID: 1908927884458703712}
   mats:
   - {fileID: 2100000, guid: eedb507557350514fa339ce9c5a162ec, type: 2}
@@ -63,6 +65,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: bfb1e6ace359432479d465ff93abe627, type: 2}
   - {fileID: 2100000, guid: 8fe9ece495510184a979825eefa8f646, type: 2}
   - {fileID: 2100000, guid: d6dc39cbe297dfa48a1617ebbd3633a6, type: 2}
+  - {fileID: 2100000, guid: 342e2471e0999dd418cf76c7d8ad914b, type: 2}
 --- !u!23 &1908927884458703712
 MeshRenderer:
   m_ObjectHideFlags: 0

@@ -29,6 +29,8 @@ public class CameraControlller : MonoBehaviour
 
         if (editMode.currentState == EditMode.State.Play)
         TryRunPathfinding();
+
+        if (Input.GetKeyDown(KeyCode.Escape)) { Application.Quit(); }
     }
 
     void Click()

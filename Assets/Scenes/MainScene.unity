@@ -3778,6 +3778,7 @@ GameObject:
   - component: {fileID: 1287678579}
   - component: {fileID: 1287678578}
   - component: {fileID: 1287678580}
+  - component: {fileID: 1287678581}
   m_Layer: 0
   m_Name: GameMap
   m_TagString: Untagged
@@ -3805,6 +3806,7 @@ MonoBehaviour:
   tilePrefab: {fileID: 6859529515136665690, guid: cdb8f045fe26bf244b380f7924f523e6, type: 3}
   characterPrefab: {fileID: 4416926081852918481, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
   pathfinding: {fileID: 1287678580}
+  redPathfinding: {fileID: 1287678581}
 --- !u!4 &1287678579
 Transform:
   m_ObjectHideFlags: 0
@@ -3821,6 +3823,18 @@ Transform:
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1287678580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1287678577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37699483abcb0204788b32956c623390, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1287678581
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
