@@ -75,6 +75,8 @@ public class EditMode : MonoBehaviour
 
     void DrawOnMap(TileDrawer drawer)
     {
+        if (!map.TileVacancyCheck(map.ConvertCoordinate(drawer.transform.localPosition))) return;
+
         if (cachedPaintColor == -1)
         {
             cachedPaintColor = drawer.GetNextTileState();

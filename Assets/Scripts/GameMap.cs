@@ -168,6 +168,11 @@ public class GameMap : MonoBehaviour
 
     }
 
+    public bool TileVacancyCheck(Vector2Int position)
+    {
+        return player.currentPosition != position && !enemies.ContainsKey(position);
+    }
+
     public Vector3 GetPlayerPosition()
     {
         return player.transform.position;
