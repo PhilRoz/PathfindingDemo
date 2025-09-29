@@ -53,8 +53,16 @@ public class GameMap : MonoBehaviour
     {
         List<Vector2Int> path;
         bool attack = enemies.ContainsKey(destination);
-        if (attack) { path = redPathfinding.FindPath(destination); }
-        else { path = pathfinding.FindPath(destination); }
+        if (attack)
+        {
+            redPathfinding.ResetSearch(tiles, player.currentPosition, BFSPathfinding.Mode.CoverPassableWithinAttackRange, attackRange: attackRange);
+            path = redPathfinding.FindPath(destination);
+        }
+        else
+        {
+            path = pathfinding.FindPath(destination);
+        }
+
         if (path != null && path.Count > 0)
         {
             PaintPath(path, attack);
@@ -68,7 +76,11 @@ public class GameMap : MonoBehaviour
         foreach (var vector in path)
         {
             if (isRed) {
-                colorToPaint = tileCount > attackRange ? 6 : 5;
+                colorToPaint = tileCount > moveRange ? 4 : 3;
+                if (tileCount + attackRange >= path.Count)
+                {
+                    colorToPaint = tiles[vector.x, vector.y].tileState == Tile.State.Cover ? 6 : 5;
+                }
             }
             else
             {
@@ -91,8 +103,8 @@ public class GameMap : MonoBehaviour
 
     public void ResetSearch()
     {
-        pathfinding.ResetSearch(tiles, player.currentPosition, true);
-        redPathfinding.ResetSearch(tiles, player.currentPosition, false);
+        pathfinding.ResetSearch(tiles, player.currentPosition, BFSPathfinding.Mode.CoverBlocked);
+        redPathfinding.ResetSearch(tiles, player.currentPosition, BFSPathfinding.Mode.CoverPassableWithinAttackRange, attackRange: attackRange);
     }
 
 
@@ -193,7 +205,14 @@ public class GameMap : MonoBehaviour
 
     public void PerformPlayerAction(Vector2Int destination)
     {
-        player.Move(pathfinding.FindPath(destination, maxStepsPerCall: 1000000));
+        if (TileVacancyCheck(destination))
+        {
+            player.Move(pathfinding.FindPath(destination));
+        }
+        else
+        {
+            player.Attack(pathfinding.FindPath(destination));
+        }
     }
     
     public void AddOrDeleteEnemy(Vector2Int position)

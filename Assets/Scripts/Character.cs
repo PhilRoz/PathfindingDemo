@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Character : MonoBehaviour
@@ -36,16 +37,25 @@ public class Character : MonoBehaviour
     public void Move(List<Vector2Int> nodes)
     {
         if (currentCoroutine != null) return;
-        if (nodes == null || nodes.Count == 0) return;
+        if (nodes == null || nodes.Count <= 1) return;
         if (nodes.Count - 1 > map.moveRange) return;
         currentCoroutine = MoveCoroutine(nodes);
         StartCoroutine(currentCoroutine);
     }
 
-    public IEnumerator MoveCoroutine(List<Vector2Int> nodes)
+    public void Attack(List<Vector2Int> nodes)
+    {
+        if (currentCoroutine != null) return;
+        if (nodes == null || nodes.Count <= 1) return;
+        if (nodes.Count - 1 > map.moveRange + map.attackRange) return;
+        currentCoroutine = MoveCoroutine(nodes, map.attackRange);
+        StartCoroutine(currentCoroutine);
+    }
+
+    public IEnumerator MoveCoroutine(List<Vector2Int> nodes, int stopBefore = 0)
     {
         float movementAnimSpeed = 0;
-        foreach (var node in nodes)
+        foreach (var node in nodes.SkipLast(stopBefore))
         {
             if (node == currentPosition) continue;
             Vector3 currentPos = transform.position;
@@ -69,7 +79,12 @@ public class Character : MonoBehaviour
             transform.position = newPos;
             
         }
-        currentPosition = nodes[^1];
+
+        if (!map.TileVacancyCheck(nodes[^1]))
+        {
+            map.AddOrDeleteEnemy(nodes[^1]);
+        }
+        currentPosition = nodes[^(1+stopBefore)];
 
         for (float f = Mathf.Min(6, movementAnimSpeed); f > 0; f-= 40 * Time.deltaTime)
         {
@@ -79,8 +94,10 @@ public class Character : MonoBehaviour
         PlayAnimation(0);
         map.ResetSearch();
         map.ClearPath();
+
         currentCoroutine = null;
     }
+
 
     private void OnFootstep(AnimationEvent animationEvent) { }
 }

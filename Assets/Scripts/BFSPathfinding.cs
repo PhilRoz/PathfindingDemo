@@ -4,18 +4,23 @@ using UnityEngine;
 
 public class BFSPathfinding : MonoBehaviour
 {
+    public enum Mode { CoverBlocked, CoverPassable, CoverPassableWithinAttackRange }
+
+    private Mode mode;
     private bool[,] visited;
     private int[,] parentX, parentY;
     private int[] queueX, queueY;
     private int queueStart, queueEnd;
     private Vector2Int startPosition;
     private Tile[,] savedTiles;
-    private bool isCoverAnObstacle;
     private int width, height;
     private static readonly int[] DirectionX = { 0, 0, -1, 1 };
     private static readonly int[] DirectionY = { -1, 1, 0, 0 };
 
-    public void ResetSearch(Tile[,] tiles, Vector2Int start, bool treatCoverAsObstacle = false)
+    private int endPositionX, endPositionY;
+    private int savedAttackRange;
+
+    public void ResetSearch(Tile[,] tiles, Vector2Int start, Mode behaviorOnCover = Mode.CoverBlocked, int attackRange = -1)
     {
         width = tiles.GetLength(0);
         height = tiles.GetLength(1);
@@ -35,7 +40,8 @@ public class BFSPathfinding : MonoBehaviour
 
         startPosition = start;
         savedTiles = tiles;
-        isCoverAnObstacle = treatCoverAsObstacle;
+        mode = behaviorOnCover;
+        savedAttackRange = attackRange;
 
         queueStart = 0;
         queueEnd = 0;
@@ -56,6 +62,12 @@ public class BFSPathfinding : MonoBehaviour
             return null;
         }
         int endX = end.x, endY = end.y;
+
+        if (mode == Mode.CoverPassableWithinAttackRange)
+        {
+            endPositionX = endX;
+            endPositionY = endY;
+        }
 
         if (!IsValidAndPassable(endX, endY)) return null;
 
@@ -98,8 +110,7 @@ public class BFSPathfinding : MonoBehaviour
         if (x < 0 || x >= width || y < 0 || y >= height) return false;
 
         Tile tile = savedTiles[x, y];
-        return tile.tileState != Tile.State.Obstacle &&
-               (!isCoverAnObstacle || tile.tileState != Tile.State.Cover);
+        return tile.tileState != Tile.State.Obstacle && tile.tileState != Tile.State.Cover;
     }
 
     private bool TryAddNeighbor(int neighborX, int neighborY, int currentX, int currentY)
@@ -110,10 +121,23 @@ public class BFSPathfinding : MonoBehaviour
             return false;
 
         Tile tile = savedTiles[neighborX, neighborY];
-        if (tile.tileState == Tile.State.Obstacle ||
-            (isCoverAnObstacle && tile.tileState == Tile.State.Cover))
+
+        if (tile.tileState == Tile.State.Obstacle)
             return false;
 
+        if (tile.tileState == Tile.State.Cover)
+        {
+            if (mode == Mode.CoverBlocked)
+            {
+                return false;
+            }
+            if (mode == Mode.CoverPassableWithinAttackRange)
+            {
+                int distance = Mathf.Abs(neighborX - endPositionX) + Mathf.Abs(neighborY - endPositionY);
+                if (distance >= savedAttackRange) { return false; }
+            }
+        }
+                
         queueX[queueEnd] = neighborX;
         queueY[queueEnd] = neighborY;
         queueEnd++;
